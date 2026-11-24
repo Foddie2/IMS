@@ -2,10 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>InventoryManagementSystem</title>
+  <title>Inventra · Inventory Dashboard</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Multi-site inventory dashboard powered by InvenTree.">
+  <meta name="color-scheme" content="light dark">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Apply the stored/system theme before first paint to avoid a light-mode flash. -->
+  <script>
+    (function () {
+      try {
+        var pref = localStorage.getItem('inventra.theme') || 'system';
+        var dark = pref === 'dark' || (pref === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

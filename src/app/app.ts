@@ -1,12 +1,13 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
-  imports: [RouterOutlet],
   selector: 'app-root',
-  styleUrl: './app.css',
-  templateUrl: './app.html',
+  imports: [RouterOutlet],
+  template: `<router-outlet />`,
 })
 export class App {
-  protected readonly title = signal('inventory-management-system');
+  // Instantiate eagerly so the theme follows the stored/system preference from the first render.
+  private readonly theme = inject(ThemeService);
 }

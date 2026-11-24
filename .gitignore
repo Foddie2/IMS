@@ -42,3 +42,8 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local secrets (InvenTree URL/token)
+.env
+.env.*
+!.env.example

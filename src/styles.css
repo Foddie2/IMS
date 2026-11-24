@@ -1,3 +1,97 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+/* Class-based dark mode: `.dark` on <html> is managed by ThemeService (+ the boot script in index.html). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Semantic design tokens. Components use these (bg-surface, text-ink, border-line, ...)
+ * instead of raw palette steps, so the whole UI re-themes by swapping variables.
+ */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-canvas: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-surface-subtle: #f1f5f9;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
+  --color-line-subtle: #f1f5f9;
+
+  --color-ink: #0f172a;
+  --color-ink-secondary: #334155;
+  --color-ink-muted: #475569;
+  --color-ink-subtle: #64748b;
+  --color-ink-faint: #94a3b8;
+
+  --color-accent-soft: #eff6ff;
+  --color-accent-ink: #1d4ed8;
+
+  /* Status text (AA on surface). Status fills stay fixed across themes. */
+  --color-good-ink: #15803d;
+  --color-warn-ink: #b45309;
+  --color-bad-ink: #b91c1c;
+
+  /* Categorical chart series, fixed order (CVD-validated light steps). */
+  --color-series-1: #2a78d6;
+  --color-series-2: #eb6834;
+  --color-series-3: #1baf7a;
+  --color-series-4: #eda100;
+  --color-series-5: #e87ba4;
+  --color-series-other: #a8a7a0;
+
+  --color-map-from: #f0f9ff;
+  --color-map-to: #eff6ff;
+  --color-map-dot: #bfdbfe;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --color-canvas: #020617;
+  --color-surface: #0f172a;
+  --color-surface-muted: #152033;
+  --color-surface-subtle: #1e293b;
+  --color-line: #263347;
+  --color-line-strong: #334155;
+  --color-line-subtle: #1b2638;
+
+  --color-ink: #f1f5f9;
+  --color-ink-secondary: #cbd5e1;
+  --color-ink-muted: #a3b1c4;
+  --color-ink-subtle: #8b9ab0;
+  --color-ink-faint: #64748b;
+
+  --color-accent-soft: #172a4a;
+  --color-accent-ink: #93c5fd;
+
+  --color-good-ink: #4ade80;
+  --color-warn-ink: #fbbf24;
+  --color-bad-ink: #f87171;
+
+  /* Same hues, stepped for the dark surface. */
+  --color-series-1: #3987e5;
+  --color-series-2: #d95926;
+  --color-series-3: #199e70;
+  --color-series-4: #c98500;
+  --color-series-5: #d55181;
+  --color-series-other: #6b6a64;
+
+  --color-map-from: #0b1628;
+  --color-map-to: #0f1d35;
+  --color-map-dot: #1e3a5f;
+}
+
+html {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

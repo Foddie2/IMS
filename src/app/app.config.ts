@@ -1,11 +1,23 @@
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import {
+  provideRouter,
+  withComponentInputBinding,
+  withInMemoryScrolling,
+} from '@angular/router';
 import { routes } from './app.routes';
-import { provideClientHydration } from '@angular/platform-browser';
+import { inventreeAuthInterceptor } from './core/interceptors/inventree-auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes), provideClientHydration()
-  ]
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),
+    ),
+    provideHttpClient(withFetch(), withInterceptors([inventreeAuthInterceptor])),
+    provideClientHydration(withEventReplay()),
+  ],
 };
