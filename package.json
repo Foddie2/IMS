@@ -9,7 +9,8 @@
     "test": "ng test",
     "serve:ssr:inventory-management-system": "node dist/inventory-management-system/server/server.mjs",
     "start:api": "dotnet run --project backend/src/Ims.Api --launch-profile http",
-    "test:api": "dotnet test backend/Ims.slnx"
+    "test:api": "dotnet test backend/Ims.slnx",
+    "test:smoke": "node backend/tests/smoke/api-smoke.mjs"
   },
   "private": true,
   "packageManager": "npm@11.20.0",

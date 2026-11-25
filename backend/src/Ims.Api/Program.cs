@@ -31,7 +31,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             "(or set the ConnectionStrings__Default environment variable).");
     }
 
-    options.UseNpgsql(connectionString, npgsql =>
+    options.UseNpgsql(ConnectionStrings.Normalize(connectionString), npgsql =>
         {
             npgsql.MigrationsHistoryTable("__ef_migrations_history", ApplicationDbContext.Schema);
             npgsql.EnableRetryOnFailure(maxRetryCount: 3);
@@ -97,8 +97,12 @@ builder.Services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("data
 
 // ---------------------------------------------------------------- CORS (Angular dev server by default)
 var allowedOrigins = config.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? ["http://localhost:4200"];
+var isDevelopment = builder.Environment.IsDevelopment();
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
-    .WithOrigins(allowedOrigins)
+    // In Development, also accept any localhost port (ng serve picks a random port when 4200 is busy).
+    .SetIsOriginAllowed(origin =>
+        allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase)
+        || (isDevelopment && Uri.TryCreate(origin, UriKind.Absolute, out var uri) && uri.IsLoopback))
     .WithHeaders("Authorization", "Content-Type", "Accept")
     .WithMethods("GET", "POST", "PUT", "DELETE")));
 

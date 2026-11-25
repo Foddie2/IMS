@@ -13,10 +13,13 @@ The browser never talks to the database. Only the API holds the connection strin
 - Node.js 22+ and `npm install`
 - A Supabase project (only its PostgreSQL database is used)
 
-## 1. Remove the old browser-facing tables (one time)
+## 1. Create the database (one paste)
 
-Earlier versions created `sites`, `products`, `profiles`… in Supabase's `public` schema.
-In Supabase go to **SQL Editor**, paste `supabase/reset.sql`, and click **Run**. The new API creates its own tables in the `ims` schema.
+In Supabase open **SQL Editor → New query**, paste the whole of `supabase/ims_master.sql` and click **Run**.
+It creates the private `ims` schema, every table, the demo data and the logins (including the owner SuperAdmin),
+and ends with a summary row (5 warehouses, 12 products, 4 users, 4358 units). It is safe to run again.
+
+Only needed on a project that still has tables from the earlier browser-only version: run `supabase/reset.sql` first.
 
 ## 2. Get the PostgreSQL connection string
 
@@ -31,6 +34,9 @@ Host=aws-0-<region>.pooler.supabase.com;Port=5432;Database=postgres;Username=pos
 - Use port **5432** (session mode). The transaction pooler on 6543 does not work well with EF Core migrations.
 
 ## 3. Store secrets (never in appsettings.json)
+
+Easiest: `powershell -ExecutionPolicy Bypass -File backend\set-connection.ps1` – paste the Session pooler URI,
+type the password (hidden), and it saves and tests the connection. Or manually:
 
 ```powershell
 cd backend/src/Ims.Api

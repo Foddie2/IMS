@@ -27,7 +27,7 @@ public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<App
         }
 
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseNpgsql(connectionString, npgsql => npgsql.MigrationsHistoryTable("__ef_migrations_history", ApplicationDbContext.Schema))
+            .UseNpgsql(ConnectionStrings.Normalize(connectionString), npgsql => npgsql.MigrationsHistoryTable("__ef_migrations_history", ApplicationDbContext.Schema))
             .UseSnakeCaseNamingConvention()
             .Options;
         return new ApplicationDbContext(options);
