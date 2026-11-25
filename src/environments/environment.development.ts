@@ -1,18 +1,12 @@
 import type { Environment } from './environment.model';
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './supabase.env';
 
-/**
- * Development environment. Uses the same server-side proxy as production:
- * put INVENTREE_URL and INVENTREE_TOKEN in a `.env` file (copy `.env.example`)
- * and restart `npm start`.
- */
+/** Development environment (`npm start`). Supabase settings come from `.env` – see `.env.example`. */
 export const environment: Environment = {
   production: false,
-  inventree: {
-    apiUrl: '/inventree/api',
-    webUrl: 'https://demo.inventree.org',
-    token: '',
+  supabase: {
+    url: SUPABASE_URL,
+    anonKey: SUPABASE_PUBLISHABLE_KEY,
     timeoutMs: 20000,
-    pageSize: 500,
-    refreshIntervalMs: 60000,
   },
 };

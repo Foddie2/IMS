@@ -41,7 +41,10 @@ const LINK_CLASS =
               <path d="m3 7 9 5 9-5M12 12v10" />
             </svg>
           </span>
-          <span class="text-lg font-bold tracking-tight text-ink">Inventra</span>
+          <span class="flex flex-col leading-tight">
+            <span class="text-lg font-bold tracking-tight text-ink">IMS</span>
+            <span class="text-[11px] font-medium text-ink-subtle">Inventory Management System</span>
+          </span>
         </a>
         @if (dismissible()) {
           <button

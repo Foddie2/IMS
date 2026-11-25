@@ -56,7 +56,7 @@ export const PLACEHOLDER_IMAGE = '/images/products/placeholder.svg';
               <div><dt class="text-xs text-ink-subtle">Stock value</dt><dd class="font-medium tabular-nums">{{ item.stock * item.unitPrice | currency }}</dd></div>
             } @else {
               <div class="col-span-2 flex items-center gap-2 text-xs text-ink-subtle">
-                <app-icon name="lock" class="size-3.5" /> Cost data requires finance access.
+                Cost data requires finance access.
               </div>
             }
           </dl>
@@ -64,17 +64,6 @@ export const PLACEHOLDER_IMAGE = '/images/products/placeholder.svg';
         </div>
 
         <div class="flex justify-end gap-2 border-t border-line bg-surface-muted px-5 py-3">
-          @if (externalUrl(); as url) {
-            <a
-              [href]="url"
-              target="_blank"
-              rel="noopener"
-              class="inline-flex items-center gap-2 rounded-xl border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600"
-            >
-              <app-icon name="external" class="size-4" /> Open in InvenTree
-              <span class="sr-only">(opens in a new tab)</span>
-            </a>
-          }
           <button
             type="button"
             class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
@@ -89,7 +78,6 @@ export const PLACEHOLDER_IMAGE = '/images/products/placeholder.svg';
 })
 export class ItemDetailsDialogComponent {
   readonly item = input<InventoryItem | null>(null);
-  readonly externalUrl = input<string | null>(null);
   /** RBAC: unit cost and stock value are only shown with `finance:view`. */
   readonly showFinance = input(true);
   readonly closed = output();

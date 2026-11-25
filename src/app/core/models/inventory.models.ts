@@ -1,5 +1,5 @@
 /**
- * Domain models consumed by the UI. Produced either from live InvenTree data
+ * Domain models consumed by the UI. Produced either from live Supabase data
  * (see `inventory.mapper.ts`) or from the bundled sample dataset.
  */
 
@@ -86,7 +86,7 @@ export interface InventorySnapshot {
   source: DataSource;
   /** Human-readable reason when running on sample data. */
   notice: string | null;
-  /** ISO time of the last successful InvenTree sync (`null` for sample data). */
+  /** ISO time of the last successful Supabase sync (`null` for sample data). */
   syncedAt: string | null;
   items: InventoryItem[];
   categories: string[];

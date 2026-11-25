@@ -1,8 +1,8 @@
 /** Storage keys, namespaced so the app can share an origin with other tools. */
 export const STORAGE_KEYS = {
-  theme: 'inventra.theme',
-  site: 'inventra.site',
-  demoRole: 'inventra.demo-role',
+  theme: 'ims.theme',
+  site: 'ims.site',
+  demoRole: 'ims.demo-role',
 } as const;
 
 /** `localStorage` read that never throws (SSR, private mode, blocked storage). */

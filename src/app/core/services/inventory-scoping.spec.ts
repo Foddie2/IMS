@@ -1,5 +1,3 @@
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { InventoryItem, Site } from '../models/inventory.models';
@@ -8,6 +6,7 @@ import { InventoryFilterStore } from './inventory-filter.store';
 import { InventoryInsightsService } from './inventory-insights.service';
 import { InventoryService } from './inventory.service';
 import { ALL_SITES, SiteContextService } from './site-context.service';
+import { SUPABASE_CONFIG } from './supabase.service';
 
 const SITES: Site[] = [
   { id: 'rtm', name: 'Rotterdam DC', city: 'Rotterdam', x: 0, y: 0 },
@@ -49,8 +48,8 @@ describe('site scoping, RBAC and filtering', () => {
     localStorage.clear();
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
+        // Demo mode regardless of the developer's .env, so tests are deterministic.
+        { provide: SUPABASE_CONFIG, useValue: { url: '', anonKey: '', timeoutMs: 1000 } },
         {
           provide: InventoryService,
           useValue: {

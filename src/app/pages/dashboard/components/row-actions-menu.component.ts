@@ -45,14 +45,6 @@ const MENU_WIDTH = 192;
             <app-icon name="copy" class="size-4 text-ink-subtle" /> Copy SKU
           </button>
         </li>
-        @if (externalUrl(); as url) {
-          <li>
-            <a class="menu-item" [href]="url" target="_blank" rel="noopener" (click)="close()">
-              <app-icon name="external" class="size-4 text-ink-subtle" /> Open in InvenTree
-              <span class="sr-only">(opens in a new tab)</span>
-            </a>
-          </li>
-        }
       </ul>
     </div>
   `,
@@ -78,7 +70,6 @@ const MENU_WIDTH = 192;
 })
 export class RowActionsMenuComponent {
   readonly item = input.required<InventoryItem>();
-  readonly externalUrl = input<string | null>(null);
   readonly view = output();
   readonly copySku = output();
 

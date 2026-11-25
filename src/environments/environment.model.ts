@@ -1,25 +1,15 @@
 export interface Environment {
   production: boolean;
-  inventree: {
+  supabase: {
+    /** Project URL: Supabase → Project Settings → API → Project URL. Empty = sample-data demo mode. */
+    url: string;
     /**
-     * REST root the browser calls.
-     * - `'/inventree/api'` (recommended): the dashboard's own server proxies to InvenTree and
-     *   attaches the token from the INVENTREE_URL / INVENTREE_TOKEN env vars (see `.env.example`).
-     * - `'https://inventree.example.com/api'`: call InvenTree directly (needs `token` + CORS).
-     * - `''`: run on sample data only.
+     * Publishable ("anon") key: Supabase → Project Settings → API Keys.
+     * Safe to ship to browsers – row-level security protects the data.
+     * NEVER put the `service_role` / secret key here.
      */
-    apiUrl: string;
-    /** Public InvenTree web URL, used for "Open in InvenTree" deep links. */
-    webUrl: string;
-    /**
-     * Direct mode only. Shipped to the browser, so use it for local development only.
-     * When set, the signed-in InvenTree user's role drives RBAC.
-     */
-    token: string;
+    anonKey: string;
+    /** Give up on a load after this many milliseconds and show sample data with a notice. */
     timeoutMs: number;
-    /** Page size for list endpoints; all pages are fetched. */
-    pageSize: number;
-    /** Background re-sync interval while the tab is visible; 0 disables it. */
-    refreshIntervalMs: number;
   };
 }

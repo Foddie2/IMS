@@ -1,38 +1,20 @@
-import { AppUser, Role } from '../models/auth.models';
-import { InvenTreeRoles, InvenTreeUser } from '../models/inventree.models';
+import { AppUser, ROLE_LABELS } from '../models/auth.models';
+import { ProfileRow } from '../models/supabase.models';
 
-function can(roles: InvenTreeRoles['roles'], ruleset: string, verb: 'view' | 'add' | 'change' | 'delete') {
-  return roles[ruleset]?.includes(verb) ?? false;
-}
-
-/**
- * Maps InvenTree's ruleset permissions onto the dashboard's personas:
- * superuser → admin; can delete parts/stock → manager; can change stock → operator; else viewer.
- */
-export function mapInvenTreeRole(roles: InvenTreeRoles): Role {
-  if (roles.is_superuser) return 'admin';
-  if (can(roles.roles, 'part', 'delete') || can(roles.roles, 'stock', 'delete')) return 'manager';
-  if (can(roles.roles, 'stock', 'change')) return 'operator';
-  return 'viewer';
-}
-
-export function mapInvenTreeUser(user: InvenTreeUser, roles: InvenTreeRoles): AppUser {
-  const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username;
-  const role = mapInvenTreeRole(roles);
+/** Maps a `profiles` row (+ the auth email) to the app user used for RBAC. */
+export function mapProfile(profile: ProfileRow, email: string): AppUser {
   return {
-    id: `inventree-${user.pk}`,
-    name,
-    title: user.email || user.username,
-    role,
-    // InvenTree has no native site scoping, so live users see every site ('*').
-    // Restrict here (e.g. from a user group naming convention) if needed.
-    siteIds: ['*'],
+    id: profile.id,
+    name: profile.full_name || email,
+    title: profile.title || ROLE_LABELS[profile.role],
+    role: profile.role,
+    siteIds: profile.site_ids ?? [],
   };
 }
 
 export function initialsOf(name: string): string {
   return name
-    .split(/\s+/)
+    .split(/[\s@.]+/)
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')

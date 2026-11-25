@@ -161,7 +161,6 @@ const PAGE_SIZE = 8;
                     </button>
                     <app-row-actions-menu
                       [item]="item"
-                      [externalUrl]="canEdit() ? inventory.partUrl(item.id) : null"
                       (view)="viewItem(item)"
                       (copySku)="copySku(item)"
                     />
@@ -174,7 +173,7 @@ const PAGE_SIZE = 8;
                   @if (store.totalCount() === 0) {
                     <app-inventory-empty-state
                       heading="No products yet"
-                      message="Parts added in InvenTree will appear here automatically."
+                      message="Products added in Supabase will appear here automatically."
                       [showReset]="false"
                     />
                   } @else {
@@ -220,7 +219,7 @@ const PAGE_SIZE = 8;
 
     <app-item-details-dialog
       [item]="detailItem()"
-      [externalUrl]="detailUrl()"
+      [showFinance]="showFinance()"
       (closed)="detailItem.set(null)"
     />
 
@@ -238,8 +237,10 @@ export class InventoryTableComponent {
   protected readonly store = inject(InventoryFilterStore);
   protected readonly inventory = inject(InventoryService);
   protected readonly auth = inject(AuthService);
-  /** RBAC: bulk selection and InvenTree deep links need edit rights. */
+  /** RBAC: bulk selection needs edit rights. */
   protected readonly canEdit = computed(() => this.auth.can('inventory:edit'));
+  /** RBAC: unit cost and stock value require finance access. */
+  protected readonly showFinance = computed(() => this.auth.can('finance:view'));
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
@@ -251,10 +252,6 @@ export class InventoryTableComponent {
   protected readonly filtersOpen = signal(true);
   protected readonly selected = signal<ReadonlySet<number>>(this.emptySelection);
   protected readonly detailItem = signal<InventoryItem | null>(null);
-  protected readonly detailUrl = computed(() => {
-    const item = this.detailItem();
-    return item && this.canEdit() ? this.inventory.partUrl(item.id) : null;
-  });
   protected readonly toast = signal<string | null>(null);
   private toastTimer: ReturnType<typeof setTimeout> | undefined;
 

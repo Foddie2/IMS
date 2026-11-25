@@ -7,7 +7,15 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:inventory-management-system": "node dist/inventory-management-system/server/server.mjs"
+    "serve:ssr:inventory-management-system": "node dist/inventory-management-system/server/server.mjs",
+    "verify:supabase": "node scripts/verify-supabase.mjs",
+    "env": "node scripts/set-env.mjs",
+    "prestart": "npm run env --silent",
+    "prebuild": "npm run env --silent",
+    "pretest": "npm run env --silent",
+    "prewatch": "npm run env --silent",
+    "postinstall": "node scripts/set-env.mjs",
+    "setup:users": "node scripts/setup-users.mjs"
   },
   "private": true,
   "packageManager": "npm@11.20.0",
@@ -20,6 +28,7 @@
     "@angular/platform-server": "^22.2.0",
     "@angular/router": "^22.2.0",
     "@angular/ssr": "^22.2.6",
+    "@supabase/supabase-js": "^2.119.2",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

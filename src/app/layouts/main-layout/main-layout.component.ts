@@ -46,8 +46,16 @@ export class MainLayoutComponent {
   private readonly mobileNav = viewChild.required<ElementRef<HTMLDialogElement>>('mobileNav');
 
   constructor() {
+    // Session ended (sign-out, expiry, revoked in another tab) → back to the login page.
+    effect(() => {
+      if (this.auth.ready() && !this.auth.isAuthenticated()) {
+        untracked(() => void this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } }));
+      }
+    });
+
     // Switching persona/role at runtime must not leave the user on a page they can no longer access.
     effect(() => {
+      if (!this.auth.accessReady()) return;
       this.auth.permissions();
       untracked(() => {
         let route = this.router.routerState.snapshot.root;

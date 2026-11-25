@@ -70,8 +70,17 @@ function trendDelta(series: readonly number[]): string | null {
           <div class="flex flex-wrap items-center gap-2">
             @if (source === 'live') {
               <span class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-good-ink">
-                <span class="size-2 rounded-full bg-[#0ca30c]" aria-hidden="true"></span> Live · InvenTree
+                <span class="size-2 rounded-full bg-[#0ca30c]" aria-hidden="true"></span> Live · Supabase
               </span>
+              @if (inventory.realtime() === 'live') {
+                <span class="inline-flex items-center gap-1.5 text-xs text-ink-subtle">
+                  <span class="relative flex size-2" aria-hidden="true">
+                    <span class="absolute inline-flex size-full animate-ping rounded-full bg-[#0ca30c] opacity-60"></span>
+                    <span class="relative inline-flex size-2 rounded-full bg-[#0ca30c]"></span>
+                  </span>
+                  Realtime
+                </span>
+              }
               @if (inventory.syncedAt(); as syncedAt) {
                 <span class="text-xs text-ink-subtle">
                   Synced <time [attr.datetime]="syncedAt">{{ syncedAt | date: 'shortTime' }}</time>

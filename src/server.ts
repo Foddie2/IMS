@@ -5,62 +5,12 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
-import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-
-// Local secrets (INVENTREE_URL / INVENTREE_TOKEN). In production, set real env vars instead.
-if (existsSync('.env')) {
-  process.loadEnvFile('.env');
-}
-
-const INVENTREE_URL = (process.env['INVENTREE_URL'] ?? '').replace(/\/+$/, '');
-const INVENTREE_TOKEN = process.env['INVENTREE_TOKEN'] ?? '';
-const PROXY_TIMEOUT_MS = 20_000;
-const FORWARDED_HEADERS = ['content-type', 'cache-control', 'etag', 'last-modified'] as const;
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
-
-/**
- * Read-only InvenTree proxy.
- *
- * The browser calls `/inventree/api/...` and `/inventree/media/...` on this origin; the server
- * forwards them to INVENTREE_URL with the API token attached. The token never reaches the
- * browser and no CORS configuration is needed on InvenTree. Only GET is forwarded.
- */
-app.get('/inventree/{*path}', async (req, res) => {
-  if (!INVENTREE_URL || !INVENTREE_TOKEN) {
-    res.status(503).json({ detail: 'InvenTree proxy is not configured (set INVENTREE_URL and INVENTREE_TOKEN).' });
-    return;
-  }
-
-  const upstreamPath = req.originalUrl.replace(/^\/inventree/, '');
-  if (!/^\/(api|media)\//.test(upstreamPath)) {
-    res.status(404).json({ detail: 'Not found.' });
-    return;
-  }
-
-  try {
-    const upstream = await fetch(`${INVENTREE_URL}${upstreamPath}`, {
-      headers: {
-        Authorization: `Token ${INVENTREE_TOKEN}`,
-        Accept: req.get('accept') ?? 'application/json',
-      },
-      signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
-    });
-
-    res.status(upstream.status);
-    for (const header of FORWARDED_HEADERS) {
-      const value = upstream.headers.get(header);
-      if (value) res.setHeader(header, value);
-    }
-    res.send(Buffer.from(await upstream.arrayBuffer()));
-  } catch {
-    res.status(502).json({ detail: 'InvenTree is unreachable from the dashboard server.' });
-  }
-});
 
 /**
  * Serve static files from /browser
@@ -75,6 +25,7 @@ app.use(
 
 /**
  * Handle all other requests by rendering the Angular application.
+ * Data is loaded in the browser straight from Supabase (protected by row-level security).
  */
 app.use((req, res, next) => {
   angularApp

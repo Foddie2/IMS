@@ -46,7 +46,7 @@ export class InventoryInsightsService {
     const siteCount = Math.max(1, this.inventory.sites().length);
     return items.map((item) => {
       const stock = sumSites(item, scope);
-      // Re-order points are company-wide in InvenTree; apportion them across sites.
+      // Re-order points are company-wide; apportion them across sites.
       const minimumStock = Math.ceil((item.minimumStock * scope.length) / siteCount);
       return { ...item, stock, minimumStock, status: deriveStockStatus(stock, minimumStock) };
     });

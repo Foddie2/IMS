@@ -43,7 +43,8 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-# Local secrets (InvenTree URL/token)
+# Local secrets (Supabase config, test credentials)
 .env
 .env.*
 !.env.example
+/src/environments/supabase.env.ts

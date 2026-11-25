@@ -58,4 +58,4 @@ export interface AppUser {
   siteIds: readonly string[];
 }
 
-export type AuthSource = 'inventree' | 'demo';
+export type AuthSource = 'supabase' | 'demo';
