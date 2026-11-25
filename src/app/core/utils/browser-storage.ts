@@ -2,7 +2,7 @@
 export const STORAGE_KEYS = {
   theme: 'ims.theme',
   site: 'ims.site',
-  demoRole: 'ims.demo-role',
+  session: 'ims.session',
 } as const;
 
 /** `localStorage` read that never throws (SSR, private mode, blocked storage). */
@@ -19,5 +19,13 @@ export function writeStorage(key: string, value: string): void {
     if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
   } catch {
     // Persistence is a convenience only.
+  }
+}
+
+export function removeStorage(key: string): void {
+  try {
+    if (typeof localStorage !== 'undefined') localStorage.removeItem(key);
+  } catch {
+    // ignore
   }
 }

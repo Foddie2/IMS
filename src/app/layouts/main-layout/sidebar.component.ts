@@ -14,19 +14,20 @@ interface NavLink {
 
 const PRIMARY_LINKS: readonly NavLink[] = [
   { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
-  { label: 'Inventory', path: '/inventory', icon: 'cube', permission: 'inventory:view' },
-  { label: 'Orders', path: '/orders', icon: 'orders', permission: 'orders:view' },
-  { label: 'Shipments', path: '/shipments', icon: 'truck', permission: 'shipments:view' },
+  { label: 'Products', path: '/products', icon: 'cube' },
+  { label: 'Inventory', path: '/inventory', icon: 'building', permission: 'inventory:view' },
+  { label: 'Purchase Orders', path: '/orders', icon: 'orders', permission: 'orders:manage' },
+  { label: 'Shipments', path: '/shipments', icon: 'truck' },
   { label: 'Reports', path: '/reports', icon: 'reports', permission: 'reports:view' },
 ];
 
 const SECONDARY_LINKS: readonly NavLink[] = [
-  { label: 'Settings', path: '/settings', icon: 'settings', permission: 'settings:manage' },
+  { label: 'Users & Access', path: '/settings', icon: 'settings', permission: 'users:manage' },
   { label: 'Support', path: '/support', icon: 'support' },
 ];
 
 const LINK_CLASS =
-  'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600';
+  'group flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600';
 
 @Component({
   selector: 'app-sidebar',
@@ -34,8 +35,8 @@ const LINK_CLASS =
   template: `
     <div class="flex h-full flex-col bg-surface">
       <div class="flex h-16 items-center justify-between gap-2 px-5">
-        <a routerLink="/dashboard" class="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-          <span class="grid size-9 place-items-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/30">
+        <a routerLink="/dashboard" class="flex items-center gap-2.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+          <span class="grid size-9 place-items-center rounded-sm bg-blue-600 text-white shadow-sm shadow-blue-600/30">
             <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
               <path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z" />
               <path d="m3 7 9 5 9-5M12 12v10" />
@@ -49,7 +50,7 @@ const LINK_CLASS =
         @if (dismissible()) {
           <button
             type="button"
-            class="grid size-9 place-items-center rounded-lg text-ink-subtle hover:bg-surface-subtle hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600 lg:hidden"
+            class="grid size-9 place-items-center rounded-sm text-ink-subtle hover:bg-surface-subtle hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600 lg:hidden"
             (click)="closed.emit()"
           >
             <app-icon name="close" class="size-5" />
@@ -98,7 +99,7 @@ const LINK_CLASS =
       </nav>
 
       <div class="border-t border-line p-4">
-        <div class="flex items-center gap-3 rounded-xl p-2">
+        <div class="flex items-center gap-3 rounded-sm p-2">
           <span class="grid size-10 shrink-0 place-items-center rounded-full bg-linear-to-br from-blue-500 to-indigo-600 text-sm font-semibold text-white" aria-hidden="true">
             {{ auth.initials() }}
           </span>

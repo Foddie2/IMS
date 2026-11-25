@@ -20,7 +20,7 @@ import { IconComponent } from '../../../shared/components/icon.component';
       @if (showReset()) {
         <button
           type="button"
-          class="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          class="mt-5 inline-flex items-center gap-2 rounded-sm bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           (click)="resetRequested.emit()"
         >
           <app-icon name="reset" class="size-4" />

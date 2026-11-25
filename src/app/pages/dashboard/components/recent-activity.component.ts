@@ -8,6 +8,7 @@ const ACTIVITY_STYLES: Record<ActivityType, { icon: IconName; tone: string; labe
   received: { icon: 'received', tone: 'bg-blue-50 text-blue-700 ring-blue-100 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-500/10', label: 'Received' },
   shipped: { icon: 'truck', tone: 'bg-green-50 text-good-ink ring-green-100 dark:bg-green-500/15 dark:ring-green-500/10', label: 'Shipped' },
   adjusted: { icon: 'adjusted', tone: 'bg-violet-50 text-violet-700 ring-violet-100 dark:bg-violet-500/15 dark:text-violet-300 dark:ring-violet-500/10', label: 'Adjusted' },
+  transfer: { icon: 'shipped', tone: 'bg-violet-50 text-violet-700 ring-violet-100 dark:bg-violet-500/15 dark:text-violet-300 dark:ring-violet-500/10', label: 'Transfer' },
   alert: { icon: 'alert', tone: 'bg-red-50 text-bad-ink ring-red-100 dark:bg-red-500/15 dark:ring-red-500/10', label: 'Alert' },
   order: { icon: 'order', tone: 'bg-amber-50 text-warn-ink ring-amber-100 dark:bg-amber-500/15 dark:ring-amber-500/10', label: 'Order' },
 };

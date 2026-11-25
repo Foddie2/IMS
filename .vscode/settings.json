@@ -1,0 +1,7 @@
+{
+  // Make the .NET SDK available in VS Code terminals even when VS Code was started
+  // with an environment captured before .NET was installed.
+  "terminal.integrated.env.windows": {
+    "PATH": "C:\\Program Files\\dotnet;${env:PATH}"
+  }
+}

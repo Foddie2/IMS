@@ -95,3 +95,48 @@ html {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Shared form & button styles for the CRUD pages (built from the same semantic tokens). */
+@layer components {
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply bg-blue-600 text-white shadow-sm hover:bg-blue-700;
+  }
+  .btn-secondary {
+    @apply border border-line-strong bg-surface text-ink-secondary hover:bg-surface-muted;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white shadow-sm hover:bg-red-700;
+  }
+  .form-label {
+    @apply mb-1 block text-sm font-medium text-ink-secondary;
+  }
+  .form-input {
+    @apply h-10 w-full rounded-sm border border-line-strong bg-surface px-3 text-sm text-ink placeholder:text-ink-subtle focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 focus:outline-none disabled:opacity-60 aria-invalid:border-red-500;
+  }
+  textarea.form-input {
+    @apply h-auto py-2;
+  }
+  .form-error {
+    @apply mt-1 text-xs text-bad-ink;
+  }
+  .data-table {
+    @apply w-full text-left text-sm;
+  }
+  .data-table thead {
+    @apply bg-surface-muted text-xs font-semibold tracking-wide text-ink-muted uppercase;
+  }
+  .data-table th {
+    @apply px-4 py-3;
+  }
+  .data-table td {
+    @apply border-t border-line-subtle px-4 py-3 text-ink-secondary;
+  }
+  .data-table tbody tr {
+    @apply transition-colors hover:bg-surface-muted/70;
+  }
+}

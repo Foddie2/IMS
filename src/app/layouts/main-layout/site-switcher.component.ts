@@ -15,7 +15,7 @@ let nextId = 0;
       <select
         #select
         [id]="id"
-        class="h-10 w-full appearance-none rounded-xl border border-line bg-surface pr-9 pl-9 text-sm font-medium text-ink focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 focus:outline-none disabled:opacity-70"
+        class="h-10 w-full appearance-none rounded-sm border border-line bg-surface pr-9 pl-9 text-sm font-medium text-ink focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 focus:outline-none disabled:opacity-70"
         [disabled]="sites.accessibleSites().length <= 1"
         (change)="sites.select(select.value)"
       >

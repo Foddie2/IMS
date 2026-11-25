@@ -1,6 +1,6 @@
 /**
- * Domain models consumed by the UI. Produced either from live Supabase data
- * (see `inventory.mapper.ts`) or from the bundled sample dataset.
+ * Domain models consumed by the dashboard UI, mapped from the IMS API DTOs
+ * (see `inventory.mapper.ts`).
  */
 
 export type StockStatus = 'in-stock' | 'low-stock' | 'out-of-stock';
@@ -30,7 +30,7 @@ export interface InventoryItem {
   imageUrl: string | null;
   /** Primary (largest) site holding this item. */
   location: string;
-  /** Units on hand per site id. May sum to less than `stock` for unlocated stock. */
+  /** Units on hand per warehouse id (as string). */
   stockBySite: Record<string, number>;
 }
 
@@ -49,7 +49,7 @@ export interface SiteWithStock extends Site {
   units: number;
 }
 
-export type ActivityType = 'received' | 'shipped' | 'adjusted' | 'alert' | 'order';
+export type ActivityType = 'received' | 'shipped' | 'adjusted' | 'transfer' | 'alert' | 'order';
 
 export interface ActivityEvent {
   id: string;
@@ -65,12 +65,13 @@ export interface ActivityEvent {
 export interface FlowPoint {
   label: string;
   inbound: number;
-  sales: number;
+  outbound: number;
 }
 
 export interface OperationsSnapshot {
   pendingOrders: number;
-  pendingOrdersCapacity: number;
+  /** Purchase orders created in the last 30 days (progress-bar denominator). */
+  recentOrders: number;
   shipmentsToday: number;
   /** Short historical series for the KPI sparklines (oldest → newest). */
   trends: {
@@ -80,17 +81,17 @@ export interface OperationsSnapshot {
   };
 }
 
-export type DataSource = 'live' | 'sample';
-
+/** Everything the dashboard needs about stock, for every warehouse the user can access. */
 export interface InventorySnapshot {
-  source: DataSource;
-  /** Human-readable reason when running on sample data. */
-  notice: string | null;
-  /** ISO time of the last successful Supabase sync (`null` for sample data). */
-  syncedAt: string | null;
+  /** ISO time the snapshot was loaded from the API. */
+  syncedAt: string;
   items: InventoryItem[];
   categories: string[];
   sites: Site[];
+}
+
+/** Site-scoped report data (summary + stock flow) for the selected warehouse scope. */
+export interface ReportSnapshot {
   activity: ActivityEvent[];
   flow: FlowPoint[];
   operations: OperationsSnapshot;

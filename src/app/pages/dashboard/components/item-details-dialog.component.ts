@@ -14,7 +14,7 @@ export const PLACEHOLDER_IMAGE = '/images/products/placeholder.svg';
   template: `
     <dialog
       #dialog
-      class="m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-slate-950/60 backdrop:backdrop-blur-sm"
+      class="m-auto w-[calc(100%-2rem)] max-w-lg rounded-sm border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-slate-950/60 backdrop:backdrop-blur-sm"
       aria-labelledby="item-dialog-title"
       (close)="closed.emit()"
     >
@@ -25,7 +25,7 @@ export const PLACEHOLDER_IMAGE = '/images/products/placeholder.svg';
             width="64"
             height="64"
             alt=""
-            class="size-16 shrink-0 rounded-xl border border-line bg-surface-muted object-contain p-1"
+            class="size-16 shrink-0 rounded-sm border border-line bg-surface-muted object-contain p-1"
           />
           <div class="min-w-0 flex-1">
             <h2 id="item-dialog-title" class="text-lg font-semibold">{{ item.name }}</h2>
@@ -34,7 +34,7 @@ export const PLACEHOLDER_IMAGE = '/images/products/placeholder.svg';
           </div>
           <button
             type="button"
-            class="grid size-9 place-items-center rounded-lg text-ink-subtle hover:bg-surface-subtle hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600"
+            class="grid size-9 place-items-center rounded-sm text-ink-subtle hover:bg-surface-subtle hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600"
             (click)="close()"
           >
             <app-icon name="close" class="size-5" />
@@ -66,7 +66,7 @@ export const PLACEHOLDER_IMAGE = '/images/products/placeholder.svg';
         <div class="flex justify-end gap-2 border-t border-line bg-surface-muted px-5 py-3">
           <button
             type="button"
-            class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            class="rounded-sm bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             (click)="close()"
           >
             Done

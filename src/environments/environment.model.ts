@@ -1,15 +1,9 @@
 export interface Environment {
   production: boolean;
-  supabase: {
-    /** Project URL: Supabase → Project Settings → API → Project URL. Empty = sample-data demo mode. */
-    url: string;
-    /**
-     * Publishable ("anon") key: Supabase → Project Settings → API Keys.
-     * Safe to ship to browsers – row-level security protects the data.
-     * NEVER put the `service_role` / secret key here.
-     */
-    anonKey: string;
-    /** Give up on a load after this many milliseconds and show sample data with a notice. */
-    timeoutMs: number;
-  };
+  /** Base URL of the IMS ASP.NET Core API, including the `/api` prefix. */
+  apiUrl: string;
+  /** Show the one-click SuperAdmin / Admin / User demo login buttons on the sign-in page. */
+  showDemoLogins: boolean;
+  /** Background refresh of dashboard data while the tab is visible; 0 disables it. */
+  refreshIntervalMs: number;
 }

@@ -49,7 +49,7 @@ const GAP = 0.8;
             <li>
               <button
                 type="button"
-                class="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-default disabled:hover:bg-transparent"
+                class="flex w-full items-center gap-2.5 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-default disabled:hover:bg-transparent"
                 [class.bg-surface-muted]="active() === seg.name"
                 [disabled]="seg.name === 'Other'"
                 [attr.aria-label]="seg.name === 'Other' ? null : 'Filter table by ' + seg.name + ', ' + (seg.share | percent: '1.0-1') + ' of units'"

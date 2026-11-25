@@ -13,7 +13,7 @@ import { PanelComponent } from '../../../shared/components/panel.component';
   imports: [DecimalPipe, PanelComponent],
   template: `
     <app-panel heading="Warehouse Locations" [subheading]="subheading()">
-      <div class="relative aspect-video overflow-hidden rounded-xl border border-line bg-linear-to-br from-map-from to-map-to">
+      <div class="relative aspect-video overflow-hidden rounded-sm border border-line bg-linear-to-br from-map-from to-map-to">
         <svg class="absolute inset-0 size-full" aria-hidden="true">
           <defs>
             <pattern id="map-dots" width="10" height="10" patternUnits="userSpaceOnUse">

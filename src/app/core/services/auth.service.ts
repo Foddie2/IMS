@@ -1,152 +1,136 @@
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { DestroyRef, PLATFORM_ID, Service, computed, inject, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-import type { Session } from '@supabase/supabase-js';
-import { catchError, from, map, of, timeout } from 'rxjs';
-import { AppUser, AuthSource, Permission, ROLE_PERMISSIONS, Role } from '../models/auth.models';
-import { ProfileRow } from '../models/supabase.models';
-import { initialsOf, mapProfile } from '../utils/auth.mapper';
-import { STORAGE_KEYS, readStorage, writeStorage } from '../utils/browser-storage';
-import { SupabaseService } from './supabase.service';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { LoginResponse, Role, UserDto } from '../models/api.models';
+import { AppUser, Permission, ROLE_PERMISSIONS } from '../models/auth.models';
+import { initialsOf, mapUser, tokenExpiry } from '../utils/auth.mapper';
+import { STORAGE_KEYS, readStorage, removeStorage, writeStorage } from '../utils/browser-storage';
+import { apiErrorMessage } from '../utils/api-error';
 
-/** Demo personas – used only when Supabase is not configured (sample-data mode). */
-export const DEMO_USERS: Record<Role, AppUser> = {
-  admin: { id: 'demo-admin', name: 'Alex Morgan', title: 'Administrator', role: 'admin', siteIds: ['*'] },
-  manager: { id: 'demo-manager', name: 'Priya Raman', title: 'Operations Manager', role: 'manager', siteIds: ['*'] },
-  operator: {
-    id: 'demo-operator',
-    name: 'Daniel Okoye',
-    title: 'Warehouse Operator · Rotterdam & Nairobi',
-    role: 'operator',
-    siteIds: ['rtm', 'nbo'],
-  },
-  viewer: { id: 'demo-viewer', name: 'Sam Lindqvist', title: 'Auditor (read-only)', role: 'viewer', siteIds: ['*'] },
-};
-
-function isRole(value: string | null): value is Role {
-  return value !== null && value in DEMO_USERS;
+interface StoredSession {
+  token: string;
+  expiresAt: number;
+  user: UserDto;
 }
 
+const SIGNED_OUT_USER: AppUser = { id: 0, name: 'Signed out', email: '', title: '', role: 'User', siteIds: [] };
+
 /**
- * Session, current user and permission checks.
+ * JWT session against the IMS API.
  *
- * Supabase mode: email/password sign-in via Supabase Auth; role and site access come from
- * the `profiles` table (and are enforced again in the database by row-level security).
- * Demo mode (Supabase not configured): switchable demo personas, no sign-in.
+ * The token and the user profile live in signals (and localStorage so a reload keeps you signed in).
+ * The token is never trusted for authorization in the UI beyond hiding actions – the API re-checks
+ * every request. On startup the stored profile is refreshed from `GET /auth/me`.
  */
 @Service()
 export class AuthService {
-  private readonly supabase = inject(SupabaseService);
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private expiryTimer: ReturnType<typeof setTimeout> | undefined;
 
-  readonly source: AuthSource = this.supabase.isConfigured ? 'supabase' : 'demo';
+  private readonly session = signal<StoredSession | null>(null);
 
-  private readonly demoRole = signal<Role>('admin');
-  readonly session = signal<Session | null>(null);
-  /** True once the stored session (if any) has been restored. Always true on the server / in demo mode. */
-  readonly ready = signal(this.source === 'demo' || !this.isBrowser);
-
-  readonly isAuthenticated = computed(() => this.source === 'demo' || this.session() !== null);
-  readonly userId = computed(() => this.session()?.user.id ?? null);
-  readonly email = computed(() => this.session()?.user.email ?? '');
-
-  private readonly profile = rxResource<AppUser | null, string | undefined>({
-    params: () => this.userId() ?? undefined,
-    stream: ({ params: userId }) =>
-      from(this.fetchProfile(userId)).pipe(
-        timeout(this.supabase.timeoutMs),
-        map((row) => (row ? mapProfile(row, this.email()) : null)),
-        catchError(() => of(null)),
-      ),
-    defaultValue: null,
-  });
-
-  /** True while a signed-in user's profile is still loading. */
-  readonly profileLoading = computed(() => this.source === 'supabase' && this.profile.isLoading());
-
-  /** Session restored and (if signed in) role/site access known – safe to evaluate permissions. */
-  readonly accessReady = computed(() => {
-    if (!this.ready()) return false;
-    if (this.source === 'demo' || !this.userId()) return true;
-    const status = this.profile.status();
-    return status === 'resolved' || status === 'error' || status === 'local';
-  });
-
+  readonly token = computed(() => this.session()?.token ?? null);
+  readonly isAuthenticated = computed(() => this.session() !== null);
   readonly user = computed<AppUser>(() => {
-    if (this.source === 'demo') return DEMO_USERS[this.demoRole()];
-    // Until (or unless) a profile row is readable, grant nothing: operator with no sites.
-    return (
-      this.profile.value() ?? {
-        id: this.userId() ?? 'anonymous',
-        name: this.email() || 'Signed out',
-        title: 'No role assigned',
-        role: 'operator',
-        siteIds: [],
-      }
-    );
+    const user = this.session()?.user;
+    return user ? mapUser(user) : SIGNED_OUT_USER;
   });
-
+  readonly userId = computed(() => this.session()?.user.id ?? null);
+  readonly role = computed(() => this.session()?.user.role ?? null);
+  readonly email = computed(() => this.session()?.user.email ?? '');
   readonly initials = computed(() => initialsOf(this.user().name));
-  readonly permissions = computed<ReadonlySet<Permission>>(() => new Set(ROLE_PERMISSIONS[this.user().role]));
-  readonly demoUsers = Object.values(DEMO_USERS);
+  readonly permissions = computed<ReadonlySet<Permission>>(() =>
+    this.isAuthenticated() ? new Set(ROLE_PERMISSIONS[this.user().role]) : new Set(),
+  );
 
   constructor() {
     if (!this.isBrowser) return;
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.expiryTimer));
 
-    if (this.source === 'demo') {
-      const stored = readStorage(STORAGE_KEYS.demoRole);
-      if (isRole(stored)) this.demoRole.set(stored);
-      return;
+    const stored = this.readStoredSession();
+    if (stored) {
+      this.setSession(stored);
+      void this.refreshProfile();
     }
+  }
 
-    const destroyRef = inject(DestroyRef);
-    void this.supabase.client().then(async (client) => {
-      const { data } = await client.auth.getSession();
-      this.session.set(data.session);
-      this.ready.set(true);
-      const { data: listener } = client.auth.onAuthStateChange((_event, session) => this.session.set(session));
-      destroyRef.onDestroy(() => listener.subscription.unsubscribe());
-    }).catch(() => this.ready.set(true));
+  /** True when the signed-in user has one of the given roles. */
+  hasRole(roles: readonly Role[]): boolean {
+    const role = this.role();
+    return role !== null && roles.includes(role);
   }
 
   can(permission: Permission): boolean {
     return this.permissions().has(permission);
   }
 
-  /** Returns an error message, or `null` on success. */
-  async signIn(email: string, password: string): Promise<string | null> {
+  /** Returns an error message for the form, or `null` on success. */
+  async login(email: string, password: string): Promise<string | null> {
     try {
-      const client = await this.supabase.client();
-      const { data, error } = await client.auth.signInWithPassword({ email, password });
-      if (error) return error.message;
-      this.session.set(data.session);
+      const response = await firstValueFrom(
+        this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password }),
+      );
+      const expiresAt = tokenExpiry(response.accessToken) ?? Date.parse(response.expiresAt);
+      this.setSession({ token: response.accessToken, expiresAt, user: response.user });
       return null;
-    } catch {
-      return 'Could not reach the sign-in service. Check your connection and try again.';
+    } catch (error) {
+      return apiErrorMessage(error, 'Sign-in failed.');
     }
   }
 
-  async signOut(): Promise<void> {
-    if (this.source === 'demo') return;
-    const client = await this.supabase.client();
-    await client.auth.signOut();
+  /** Clears the session. With `redirect`, goes to /login and remembers where the user was. */
+  logout(options: { redirect?: boolean; returnUrl?: string } = {}): void {
+    clearTimeout(this.expiryTimer);
     this.session.set(null);
+    removeStorage(STORAGE_KEYS.session);
+    if (options.redirect) {
+      const returnUrl = options.returnUrl ?? this.router.url;
+      void this.router.navigate(['/login'], {
+        queryParams: returnUrl && !returnUrl.startsWith('/login') ? { returnUrl } : {},
+      });
+    }
   }
 
-  /** Switch persona (demo mode only). */
-  switchDemoRole(role: Role): void {
-    this.demoRole.set(role);
-    writeStorage(STORAGE_KEYS.demoRole, role);
+  /** Re-reads role and warehouse assignments (they may have changed since sign-in). */
+  async refreshProfile(): Promise<void> {
+    const current = this.session();
+    if (!current) return;
+    try {
+      const user = await firstValueFrom(this.http.get<UserDto>(`${environment.apiUrl}/auth/me`));
+      if (this.session()?.token === current.token) {
+        this.setSession({ ...current, user });
+      }
+    } catch {
+      // 401 is handled by the interceptor (logout); network errors keep the cached profile.
+    }
   }
 
-  private async fetchProfile(userId: string): Promise<ProfileRow | null> {
-    const client = await this.supabase.client();
-    const { data, error } = await client
-      .from('profiles')
-      .select('id, full_name, title, role, site_ids')
-      .eq('id', userId)
-      .maybeSingle();
-    if (error) throw error;
-    return data as ProfileRow | null;
+  private setSession(session: StoredSession): void {
+    this.session.set(session);
+    writeStorage(STORAGE_KEYS.session, JSON.stringify(session));
+
+    clearTimeout(this.expiryTimer);
+    const remaining = session.expiresAt - Date.now();
+    // setTimeout overflows above ~24.8 days; tokens are much shorter than that.
+    this.expiryTimer = setTimeout(() => this.logout({ redirect: true }), Math.min(remaining, 2_147_000_000));
+  }
+
+  private readStoredSession(): StoredSession | null {
+    const raw = readStorage(STORAGE_KEYS.session);
+    if (!raw) return null;
+    try {
+      const session = JSON.parse(raw) as StoredSession;
+      const valid = typeof session.token === 'string' && session.user && session.expiresAt > Date.now() + 5_000;
+      if (!valid) removeStorage(STORAGE_KEYS.session);
+      return valid ? session : null;
+    } catch {
+      removeStorage(STORAGE_KEYS.session);
+      return null;
+    }
   }
 }

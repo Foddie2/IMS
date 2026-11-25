@@ -8,8 +8,8 @@ import { IconComponent } from '../../shared/components/icon.component';
   selector: 'app-forbidden',
   imports: [IconComponent, RouterLink],
   template: `
-    <div class="mx-auto max-w-xl rounded-2xl border border-line bg-surface px-6 py-16 text-center shadow-sm">
-      <span class="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-red-50 text-bad-ink dark:bg-red-500/15">
+    <div class="mx-auto max-w-xl rounded-sm border border-line bg-surface px-6 py-16 text-center shadow-sm">
+      <span class="mx-auto mb-4 grid size-12 place-items-center rounded-sm bg-red-50 text-bad-ink dark:bg-red-500/15">
         <app-icon name="lock" class="size-6" />
       </span>
       <h1 class="text-xl font-bold text-ink">You don't have access to this page</h1>
@@ -19,7 +19,7 @@ import { IconComponent } from '../../shared/components/icon.component';
       </p>
       <a
         routerLink="/dashboard"
-        class="mt-6 inline-flex rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        class="mt-6 inline-flex rounded-sm bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
       >
         Back to dashboard
       </a>

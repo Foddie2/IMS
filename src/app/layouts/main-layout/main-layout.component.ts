@@ -1,22 +1,23 @@
-import { Component, ElementRef, effect, inject, untracked, viewChild } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Component, ElementRef, PLATFORM_ID, effect, inject, untracked, viewChild } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { Permission } from '../../core/models/auth.models';
 import { AuthService } from '../../core/services/auth.service';
+import { ToasterComponent } from '../../shared/components/toaster.component';
 import { SidebarComponent } from './sidebar.component';
 import { TopbarComponent } from './topbar.component';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [RouterOutlet, SidebarComponent, TopbarComponent],
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent, ToasterComponent],
   template: `
     <a
       href="#main-content"
-      class="sr-only z-50 rounded-lg bg-surface px-4 py-2 text-sm font-semibold text-accent-ink shadow focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+      class="sr-only z-50 rounded-sm bg-surface px-4 py-2 text-sm font-semibold text-accent-ink shadow focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
     >
       Skip to main content
     </a>
 
-    <!-- Desktop sidebar. User-dependent chrome skips hydration: the persona/role is only known in the browser. -->
+    <!-- Desktop sidebar. User-dependent chrome skips hydration: the session is only known in the browser. -->
     <aside class="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-line lg:block">
       <app-sidebar ngSkipHydration />
     </aside>
@@ -37,6 +38,8 @@ import { TopbarComponent } from './topbar.component';
         <router-outlet />
       </main>
     </div>
+
+    <app-toaster />
   `,
   host: { class: 'block min-h-dvh bg-canvas' },
 })
@@ -46,26 +49,18 @@ export class MainLayoutComponent {
   private readonly mobileNav = viewChild.required<ElementRef<HTMLDialogElement>>('mobileNav');
 
   constructor() {
-    // Session ended (sign-out, expiry, revoked in another tab) → back to the login page.
-    effect(() => {
-      if (this.auth.ready() && !this.auth.isAuthenticated()) {
-        untracked(() => void this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } }));
-      }
-    });
-
-    // Switching persona/role at runtime must not leave the user on a page they can no longer access.
-    effect(() => {
-      if (!this.auth.accessReady()) return;
-      this.auth.permissions();
-      untracked(() => {
-        let route = this.router.routerState.snapshot.root;
-        while (route.firstChild) route = route.firstChild;
-        const required = route.data['permission'] as Permission | undefined;
-        if (required && !this.auth.can(required)) {
-          void this.router.navigate(['/forbidden']);
+    // Session ended (sign-out in another tab, token expiry, 401) → back to the login page.
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      effect(() => {
+        if (!this.auth.isAuthenticated()) {
+          untracked(() => {
+            if (!this.router.url.startsWith('/login')) {
+              void this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+            }
+          });
         }
       });
-    });
+    }
   }
 
   protected openSidebar(): void {

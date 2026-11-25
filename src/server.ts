@@ -25,7 +25,7 @@ app.use(
 
 /**
  * Handle all other requests by rendering the Angular application.
- * Data is loaded in the browser straight from Supabase (protected by row-level security).
+ * Data is loaded in the browser from the IMS API (backend/), which owns auth and the database.
  */
 app.use((req, res, next) => {
   angularApp

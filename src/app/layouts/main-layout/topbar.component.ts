@@ -17,7 +17,7 @@ import { ThemeToggleComponent } from './theme-toggle.component';
       <div class="flex h-16 items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
         <button
           type="button"
-          class="grid size-10 shrink-0 place-items-center rounded-lg text-ink-muted hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-blue-600 lg:hidden"
+          class="grid size-10 shrink-0 place-items-center rounded-sm text-ink-muted hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-blue-600 lg:hidden"
           aria-haspopup="dialog"
           (click)="menuToggled.emit()"
         >
@@ -44,7 +44,7 @@ import { ThemeToggleComponent } from './theme-toggle.component';
               type="search"
               autocomplete="off"
               placeholder="Search products or SKU…"
-              class="h-10 w-full rounded-xl border border-line bg-surface-muted pr-3 pl-9 text-sm text-ink placeholder:text-ink-subtle focus:border-blue-500 focus:bg-surface focus:ring-4 focus:ring-blue-500/15 focus:outline-none"
+              class="h-10 w-full rounded-sm border border-line bg-surface-muted pr-3 pl-9 text-sm text-ink placeholder:text-ink-subtle focus:border-blue-500 focus:bg-surface focus:ring-4 focus:ring-blue-500/15 focus:outline-none"
               [formField]="searchForm.query"
             />
           </div>
@@ -55,7 +55,7 @@ import { ThemeToggleComponent } from './theme-toggle.component';
 
         <button
           type="button"
-          class="relative hidden size-10 shrink-0 place-items-center rounded-xl text-ink-muted hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-blue-600 sm:grid"
+          class="relative hidden size-10 shrink-0 place-items-center rounded-sm text-ink-muted hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-blue-600 sm:grid"
         >
           <app-icon name="bell" class="size-5" />
           <span class="absolute top-2 right-2 size-2 rounded-full bg-red-500 ring-2 ring-surface" aria-hidden="true"></span>

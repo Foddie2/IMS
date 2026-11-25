@@ -25,7 +25,7 @@ const MAX_ROWS = 6;
           <li>
             <button
               type="button"
-              class="group w-full rounded-lg p-1 -m-1 text-left hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600"
+              class="group w-full rounded-sm p-1 -m-1 text-left hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600"
               [attr.aria-label]="'Filter table by ' + row.category + ': ' + row.inStock + ' in stock, ' + row.lowStock + ' low stock, ' + row.outOfStock + ' out of stock'"
               (click)="categorySelected.emit(row.category)"
             >

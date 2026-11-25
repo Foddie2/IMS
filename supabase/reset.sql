@@ -1,7 +1,7 @@
 -- =============================================================================
--- IMS · RESET – removes every IMS table, function, trigger and type.
--- Supabase Auth users (your logins) are NOT deleted; `npm run setup:users`
--- re-creates their profiles/roles and can reset passwords.
+-- IMS · RESET – removes the OLD browser-facing IMS tables from the public schema.
+-- The IMS API (backend/) now owns the database and uses its own private `ims` schema;
+-- run this once so the old public tables are no longer exposed. Supabase Auth users are not touched.
 -- ⚠ All inventory data in these tables is permanently deleted.
 -- =============================================================================
 drop trigger if exists on_auth_user_created on auth.users;

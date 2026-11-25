@@ -1,14 +1,15 @@
+import { UserDto } from '../models/api.models';
 import { AppUser, ROLE_LABELS } from '../models/auth.models';
-import { ProfileRow } from '../models/supabase.models';
 
-/** Maps a `profiles` row (+ the auth email) to the app user used for RBAC. */
-export function mapProfile(profile: ProfileRow, email: string): AppUser {
+/** Maps the API user to the app user used for RBAC and display. */
+export function mapUser(user: UserDto): AppUser {
   return {
-    id: profile.id,
-    name: profile.full_name || email,
-    title: profile.title || ROLE_LABELS[profile.role],
-    role: profile.role,
-    siteIds: profile.site_ids ?? [],
+    id: user.id,
+    name: user.fullName || user.email,
+    email: user.email,
+    title: ROLE_LABELS[user.role],
+    role: user.role,
+    siteIds: user.role === 'User' ? user.assignedWarehouseIds.map(String) : ['*'],
   };
 }
 
@@ -19,4 +20,17 @@ export function initialsOf(name: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('');
+}
+
+/** Reads the `exp` claim of a JWT (seconds since epoch) without verifying it. */
+export function tokenExpiry(token: string): number | null {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    const exp = (JSON.parse(json) as { exp?: unknown }).exp;
+    return typeof exp === 'number' ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
 }

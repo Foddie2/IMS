@@ -19,7 +19,7 @@ import { IconComponent } from '../../../shared/components/icon.component';
             type="search"
             autocomplete="off"
             placeholder="Name or SKU"
-            class="h-10 w-full rounded-xl border border-line-strong bg-surface pr-3 pl-9 text-sm text-ink placeholder:text-ink-subtle focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 focus:outline-none"
+            class="h-10 w-full rounded-sm border border-line-strong bg-surface pr-3 pl-9 text-sm text-ink placeholder:text-ink-subtle focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 focus:outline-none"
             [formField]="filterForm.query"
           />
         </div>
@@ -30,7 +30,7 @@ import { IconComponent } from '../../../shared/components/icon.component';
         <div class="relative">
           <select
             id="filter-category"
-            class="h-10 w-full appearance-none rounded-xl border border-line-strong bg-surface pr-9 pl-3 text-sm text-ink focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 focus:outline-none"
+            class="h-10 w-full appearance-none rounded-sm border border-line-strong bg-surface pr-9 pl-3 text-sm text-ink focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 focus:outline-none"
             [formField]="filterForm.category"
           >
             <option [value]="all">All categories</option>
@@ -44,10 +44,10 @@ import { IconComponent } from '../../../shared/components/icon.component';
 
       <fieldset>
         <legend class="mb-1 block text-xs font-medium text-ink-muted">Stock status</legend>
-        <div class="flex flex-wrap gap-1 rounded-xl bg-surface-subtle p-1">
+        <div class="flex flex-wrap gap-1 rounded-sm bg-surface-subtle p-1">
           @for (option of statusOptions; track option.value) {
             <label
-              class="relative cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink has-[:checked]:bg-surface has-[:checked]:text-ink has-[:checked]:shadow-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-blue-600"
+              class="relative cursor-pointer rounded-sm px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink has-[:checked]:bg-surface has-[:checked]:text-ink has-[:checked]:shadow-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-blue-600"
             >
               <input type="radio" class="sr-only" [value]="option.value" [formField]="filterForm.status" />
               @if (option.dot) {
@@ -61,7 +61,7 @@ import { IconComponent } from '../../../shared/components/icon.component';
 
       <button
         type="button"
-        class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-line-strong bg-surface px-4 text-sm font-medium text-ink-secondary hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60 lg:ml-auto"
+        class="inline-flex h-10 items-center justify-center gap-2 rounded-sm border border-line-strong bg-surface px-4 text-sm font-medium text-ink-secondary hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60 lg:ml-auto"
         [disabled]="!store.hasActiveFilters()"
         (click)="store.reset()"
       >

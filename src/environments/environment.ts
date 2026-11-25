@@ -1,12 +1,12 @@
 import type { Environment } from './environment.model';
-import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './supabase.env';
 
-/** Production environment. Supabase settings come from `.env` or CI env vars – see `.env.example`. */
+/**
+ * Production build. Point `apiUrl` at your deployed IMS API (and add this site's origin to the
+ * API's `Cors:AllowedOrigins`). No database credentials or keys ever live in the frontend.
+ */
 export const environment: Environment = {
   production: true,
-  supabase: {
-    url: SUPABASE_URL,
-    anonKey: SUPABASE_PUBLISHABLE_KEY,
-    timeoutMs: 20000,
-  },
+  apiUrl: 'http://localhost:5000/api',
+  showDemoLogins: true,
+  refreshIntervalMs: 30000,
 };

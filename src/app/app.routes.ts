@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/guards/auth.guard';
-import { permissionGuard } from './core/guards/permission.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { Role } from './core/models/api.models';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 
-const comingSoon = () =>
-  import('./pages/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent);
+const ANY: Role[] = ['User', 'Admin', 'SuperAdmin'];
+const ADMIN_UP: Role[] = ['Admin', 'SuperAdmin'];
+const SUPER_ADMIN: Role[] = ['SuperAdmin'];
 
 export const routes: Routes = [
   {
@@ -26,45 +28,52 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
       {
+        path: 'products',
+        title: 'Products · IMS',
+        canActivate: [roleGuard],
+        data: { breadcrumb: 'Products', roles: ANY },
+        loadComponent: () => import('./pages/products/products-page.component').then((m) => m.ProductsPageComponent),
+      },
+      {
         path: 'inventory',
         title: 'Inventory · IMS',
-        canActivate: [permissionGuard],
-        data: { breadcrumb: 'Inventory', permission: 'inventory:view' },
-        loadComponent: comingSoon,
+        canActivate: [roleGuard],
+        data: { breadcrumb: 'Inventory', roles: ANY },
+        loadComponent: () => import('./pages/inventory/inventory-page.component').then((m) => m.InventoryPageComponent),
       },
       {
         path: 'orders',
-        title: 'Orders · IMS',
-        canActivate: [permissionGuard],
-        data: { breadcrumb: 'Orders', permission: 'orders:view' },
-        loadComponent: comingSoon,
+        title: 'Purchase Orders · IMS',
+        canActivate: [roleGuard],
+        data: { breadcrumb: 'Purchase Orders', roles: ADMIN_UP },
+        loadComponent: () => import('./pages/orders/orders-page.component').then((m) => m.OrdersPageComponent),
       },
       {
         path: 'shipments',
         title: 'Shipments · IMS',
-        canActivate: [permissionGuard],
-        data: { breadcrumb: 'Shipments', permission: 'shipments:view' },
-        loadComponent: comingSoon,
+        canActivate: [roleGuard],
+        data: { breadcrumb: 'Shipments', roles: ANY },
+        loadComponent: () => import('./pages/shipments/shipments-page.component').then((m) => m.ShipmentsPageComponent),
       },
       {
         path: 'reports',
         title: 'Reports · IMS',
-        canActivate: [permissionGuard],
-        data: { breadcrumb: 'Reports', permission: 'reports:view' },
-        loadComponent: comingSoon,
+        canActivate: [roleGuard],
+        data: { breadcrumb: 'Reports', roles: ADMIN_UP },
+        loadComponent: () => import('./pages/reports/reports-page.component').then((m) => m.ReportsPageComponent),
       },
       {
         path: 'settings',
-        title: 'Settings · IMS',
-        canActivate: [permissionGuard],
-        data: { breadcrumb: 'Settings', permission: 'settings:manage' },
-        loadComponent: comingSoon,
+        title: 'Users & Access · IMS',
+        canActivate: [roleGuard],
+        data: { breadcrumb: 'Users & Access', roles: SUPER_ADMIN },
+        loadComponent: () => import('./pages/settings/users-page.component').then((m) => m.UsersPageComponent),
       },
       {
         path: 'support',
         title: 'Support · IMS',
         data: { breadcrumb: 'Support' },
-        loadComponent: comingSoon,
+        loadComponent: () => import('./pages/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
       },
       {
         path: 'forbidden',

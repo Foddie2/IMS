@@ -43,8 +43,7 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-# Local secrets (Supabase config, test credentials)
+# Local secrets
 .env
 .env.*
 !.env.example
-/src/environments/supabase.env.ts

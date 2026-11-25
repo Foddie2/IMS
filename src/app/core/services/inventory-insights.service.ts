@@ -1,14 +1,17 @@
-import { Service, computed, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID, Service, computed, inject, linkedSignal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { forkJoin, map } from 'rxjs';
 import {
   CategoryShare,
   CategoryStockLevels,
-  FlowPoint,
   InventoryItem,
   InventoryMetrics,
-  OperationsSnapshot,
+  ReportSnapshot,
   SiteWithStock,
 } from '../models/inventory.models';
-import { deriveStockStatus } from '../utils/inventory.mapper';
+import { deriveStockStatus, mapReportSnapshot } from '../utils/inventory.mapper';
+import { ReportService } from './api.services';
 import { InventoryService } from './inventory.service';
 import { SiteContextService } from './site-context.service';
 
@@ -28,27 +31,46 @@ function sumSites(item: InventoryItem, siteIds: readonly string[]): number {
 }
 
 /**
- * Site-scoped view of the inventory: every number on the dashboard is derived
- * here with `computed()`, so switching site, role or data source updates the
- * whole page consistently.
+ * Site-scoped view of the inventory. Stock-derived numbers are computed locally with
+ * `computed()` (instant when switching site); flow, activity and order KPIs come from the
+ * API's report endpoints for exactly the selected warehouse scope.
  */
 @Service()
 export class InventoryInsightsService {
   private readonly inventory = inject(InventoryService);
   private readonly siteContext = inject(SiteContextService);
+  private readonly reports = inject(ReportService);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
-  /** Items with stock, minimum and status re-computed for the selected site scope. */
+  private readonly reportResource = rxResource<ReportSnapshot, { warehouseId: number | null; version: number } | undefined>({
+    params: () => {
+      const version = this.inventory.version();
+      if (!this.isBrowser || version === 0) return undefined;
+      const site = this.siteContext.selectedSite();
+      return { warehouseId: site ? Number(site.id) : null, version };
+    },
+    stream: ({ params }) =>
+      forkJoin({
+        summary: this.reports.inventorySummary(params.warehouseId),
+        flow: this.reports.stockFlow(12, params.warehouseId),
+      }).pipe(map(({ summary, flow }) => mapReportSnapshot(summary, flow))),
+  });
+
+  /** Keeps showing the previous report while a new scope loads (no chart flicker). */
+  private readonly report = linkedSignal<ReportSnapshot | undefined, ReportSnapshot | null>({
+    source: () => (this.reportResource.hasValue() ? this.reportResource.value() : undefined),
+    computation: (next, previous) => next ?? previous?.value ?? null,
+  });
+
+  /** Items with stock and status re-computed for the selected site scope. */
   readonly items = computed<InventoryItem[]>(() => {
     const items = this.inventory.items();
     if (this.siteContext.isGlobalScope()) return items;
 
     const scope = this.siteContext.scopeSiteIds();
-    const siteCount = Math.max(1, this.inventory.sites().length);
     return items.map((item) => {
       const stock = sumSites(item, scope);
-      // Re-order points are company-wide; apportion them across sites.
-      const minimumStock = Math.ceil((item.minimumStock * scope.length) / siteCount);
-      return { ...item, stock, minimumStock, status: deriveStockStatus(stock, minimumStock) };
+      return { ...item, stock, status: deriveStockStatus(stock, item.minimumStock) };
     });
   });
 
@@ -63,14 +85,7 @@ export class InventoryInsightsService {
     };
   });
 
-  /** Share of company-wide units that fall inside the current scope (scales flow/ops series). */
-  private readonly scopeShare = computed(() => {
-    if (this.siteContext.isGlobalScope()) return 1;
-    const total = this.inventory.items().reduce((sum, item) => sum + item.stock, 0);
-    return total > 0 ? this.metrics().totalItems / total : 0;
-  });
-
-  /** Accessible sites with units on hand; the selected site is flagged for the map. */
+  /** Accessible sites with units on hand. */
   readonly sites = computed<SiteWithStock[]>(() => {
     const items = this.inventory.items();
     return this.siteContext.accessibleSites().map((site) => ({
@@ -79,38 +94,9 @@ export class InventoryInsightsService {
     }));
   });
 
-  readonly activity = computed(() => {
-    const events = this.inventory.activity();
-    if (this.siteContext.isGlobalScope()) return events.slice(0, 5);
-    const scope = new Set(this.siteContext.scopeSiteIds());
-    return events.filter((e) => e.siteId !== undefined && scope.has(e.siteId)).slice(0, 5);
-  });
-
-  readonly flow = computed<FlowPoint[]>(() => {
-    const share = this.scopeShare();
-    return this.inventory.flow().map((p) => ({
-      label: p.label,
-      inbound: Math.round(p.inbound * share),
-      sales: Math.round(p.sales * share),
-    }));
-  });
-
-  readonly operations = computed<OperationsSnapshot | null>(() => {
-    const ops = this.inventory.operations();
-    if (!ops) return null;
-    const share = this.scopeShare();
-    const scale = (n: number) => Math.round(n * share);
-    return {
-      pendingOrders: scale(ops.pendingOrders),
-      pendingOrdersCapacity: Math.max(1, scale(ops.pendingOrdersCapacity)),
-      shipmentsToday: scale(ops.shipmentsToday),
-      trends: {
-        items: ops.trends.items.map(scale),
-        value: ops.trends.value.map(scale),
-        shipments: ops.trends.shipments.map(scale),
-      },
-    };
-  });
+  readonly activity = computed(() => this.report()?.activity ?? []);
+  readonly flow = computed(() => this.report()?.flow ?? []);
+  readonly operations = computed(() => this.report()?.operations ?? null);
 
   /** Units per category; the long tail folds into "Other" so colours never cycle. */
   readonly categoryDistribution = computed<CategoryShare[]>(() => {

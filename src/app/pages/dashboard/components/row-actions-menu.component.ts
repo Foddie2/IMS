@@ -15,7 +15,7 @@ const MENU_WIDTH = 192;
     <button
       #trigger
       type="button"
-      class="grid size-9 place-items-center rounded-lg text-ink-subtle hover:bg-surface-subtle hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600"
+      class="grid size-9 place-items-center rounded-sm text-ink-subtle hover:bg-surface-subtle hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600"
       [attr.popovertarget]="menuId()"
       [attr.aria-expanded]="open()"
       [attr.aria-controls]="menuId()"
@@ -28,7 +28,7 @@ const MENU_WIDTH = 192;
       #menu
       popover
       [id]="menuId()"
-      class="inset-auto m-0 w-48 rounded-xl border border-line bg-surface p-1 text-sm shadow-xl"
+      class="inset-auto m-0 w-48 rounded-sm border border-line bg-surface p-1 text-sm shadow-xl"
       [style.position]="'fixed'"
       [style.top.px]="position().top"
       [style.left.px]="position().left"

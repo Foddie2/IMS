@@ -8,7 +8,7 @@ const HEIGHT = 264;
 const PAD = { top: 16, right: 16, bottom: 32, left: 48 } as const;
 const SERIES = {
   inbound: { label: 'Inventory inflow', color: 'var(--color-series-1)' },
-  sales: { label: 'Sales', color: 'var(--color-series-2)' },
+  outbound: { label: 'Outbound', color: 'var(--color-series-2)' },
 } as const;
 
 function niceCeil(value: number): number {
@@ -32,8 +32,8 @@ function smoothPath(points: readonly (readonly [number, number])[]): string {
   selector: 'app-inventory-flow-chart',
   imports: [DecimalPipe, PanelComponent],
   template: `
-    <app-panel heading="Inventory Flow & Sales Performance" subheading="Units received vs. units sold per month">
-      <span panelActions class="rounded-lg border border-line px-2.5 py-1 text-xs font-medium text-ink-muted">Last 12 months</span>
+    <app-panel heading="Inventory Flow & Sales Performance" subheading="Units received vs. units shipped per month">
+      <span panelActions class="rounded-sm border border-line px-2.5 py-1 text-xs font-medium text-ink-muted">Last 12 months</span>
 
       <ul class="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-muted" aria-label="Legend">
         @for (s of legend; track s.key) {
@@ -46,11 +46,11 @@ function smoothPath(points: readonly (readonly [number, number])[]): string {
       </ul>
 
       <div
-        class="relative rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600"
+        class="relative rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600"
         tabindex="0"
         role="group"
         aria-roledescription="chart"
-        aria-label="Inventory flow and sales, last 12 months. Use left and right arrow keys to inspect months."
+        aria-label="Inventory flow and outbound, last 12 months. Use left and right arrow keys to inspect months."
         (keydown)="onKeydown($event)"
         (focus)="hovered.set(hovered() ?? data().length - 1)"
         (blur)="hovered.set(null)"
@@ -68,7 +68,7 @@ function smoothPath(points: readonly (readonly [number, number])[]): string {
               <stop offset="0%" [style.stop-color]="legend[0].color" stop-opacity="0.28" />
               <stop offset="100%" [style.stop-color]="legend[0].color" stop-opacity="0.02" />
             </linearGradient>
-            <linearGradient id="flow-sales" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="flow-outbound" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" [style.stop-color]="legend[1].color" stop-opacity="0.12" />
               <stop offset="100%" [style.stop-color]="legend[1].color" stop-opacity="0.02" />
             </linearGradient>
@@ -86,9 +86,9 @@ function smoothPath(points: readonly (readonly [number, number])[]): string {
           }
 
           <path [attr.d]="geometry().inbound.area" fill="url(#flow-inbound)" />
-          <path [attr.d]="geometry().sales.area" fill="url(#flow-sales)" />
+          <path [attr.d]="geometry().outbound.area" fill="url(#flow-outbound)" />
           <path [attr.d]="geometry().inbound.line" fill="none" [style.stroke]="legend[0].color" stroke-width="2" stroke-linejoin="round" />
-          <path [attr.d]="geometry().sales.line" fill="none" [style.stroke]="legend[1].color" stroke-width="2" stroke-linejoin="round" />
+          <path [attr.d]="geometry().outbound.line" fill="none" [style.stroke]="legend[1].color" stroke-width="2" stroke-linejoin="round" />
 
           @if (active(); as a) {
             <line [attr.x1]="a.x" [attr.x2]="a.x" [attr.y1]="pad.top" [attr.y2]="height - pad.bottom" class="stroke-ink-faint" stroke-width="1" stroke-dasharray="3 3" />
@@ -99,7 +99,7 @@ function smoothPath(points: readonly (readonly [number, number])[]): string {
 
         @if (active(); as a) {
           <div
-            class="pointer-events-none absolute top-2 z-10 min-w-40 -translate-x-1/2 rounded-xl border border-line bg-surface px-3 py-2 text-xs shadow-lg"
+            class="pointer-events-none absolute top-2 z-10 min-w-40 -translate-x-1/2 rounded-sm border border-line bg-surface px-3 py-2 text-xs shadow-lg"
             [style.left.px]="a.tooltipX"
             aria-hidden="true"
           >
@@ -109,8 +109,8 @@ function smoothPath(points: readonly (readonly [number, number])[]): string {
               <span class="font-semibold text-ink tabular-nums">{{ a.point.inbound | number }}</span>
             </p>
             <p class="flex items-center justify-between gap-4 text-ink-muted">
-              <span class="flex items-center gap-1.5"><span class="size-2 rounded-full" [style.background-color]="legend[1].color"></span>Sales</span>
-              <span class="font-semibold text-ink tabular-nums">{{ a.point.sales | number }}</span>
+              <span class="flex items-center gap-1.5"><span class="size-2 rounded-full" [style.background-color]="legend[1].color"></span>Outbound</span>
+              <span class="font-semibold text-ink tabular-nums">{{ a.point.outbound | number }}</span>
             </p>
           </div>
         }
@@ -118,7 +118,7 @@ function smoothPath(points: readonly (readonly [number, number])[]): string {
 
       <p class="sr-only" aria-live="polite">
         @if (active(); as a) {
-          {{ a.point.label }}: inflow {{ a.point.inbound | number }} units, sales {{ a.point.sales | number }} units.
+          {{ a.point.label }}: inflow {{ a.point.inbound | number }} units, outbound {{ a.point.outbound | number }} units.
         }
       </p>
     </app-panel>
@@ -133,14 +133,14 @@ export class InventoryFlowChartComponent {
   protected readonly pad = PAD;
   protected readonly legend = [
     { key: 'inbound' as const, ...SERIES.inbound },
-    { key: 'sales' as const, ...SERIES.sales },
+    { key: 'outbound' as const, ...SERIES.outbound },
   ];
   protected readonly hovered = signal<number | null>(null);
 
   protected readonly totals = computed(() =>
     this.data().reduce(
-      (acc, p) => ({ inbound: acc.inbound + p.inbound, sales: acc.sales + p.sales }),
-      { inbound: 0, sales: 0 },
+      (acc, p) => ({ inbound: acc.inbound + p.inbound, outbound: acc.outbound + p.outbound }),
+      { inbound: 0, outbound: 0 },
     ),
   );
 
@@ -150,14 +150,14 @@ export class InventoryFlowChartComponent {
     const width = Math.max(this.hostWidth() - 40, 280);
     const plotW = width - PAD.left - PAD.right;
     const plotH = HEIGHT - PAD.top - PAD.bottom;
-    const max = niceCeil(Math.max(1, ...data.flatMap((d) => [d.inbound, d.sales])));
+    const max = niceCeil(Math.max(1, ...data.flatMap((d) => [d.inbound, d.outbound])));
     const step = data.length > 1 ? plotW / (data.length - 1) : 0;
 
     const x = (i: number) => PAD.left + i * step;
     const y = (v: number) => PAD.top + plotH * (1 - v / max);
     const baseline = PAD.top + plotH;
 
-    const series = (key: 'inbound' | 'sales') => {
+    const series = (key: 'inbound' | 'outbound') => {
       const points = data.map((d, i) => [x(i), y(d[key])] as const);
       const line = smoothPath(points);
       const area = points.length
@@ -175,7 +175,7 @@ export class InventoryFlowChartComponent {
       x,
       y,
       inbound: series('inbound'),
-      sales: series('sales'),
+      outbound: series('outbound'),
       ticks: [0, 0.25, 0.5, 0.75, 1].map((t) => ({
         value: max * t,
         y: PAD.top + plotH * (1 - t),
@@ -197,7 +197,7 @@ export class InventoryFlowChartComponent {
       point,
       x,
       inboundY: g.y(point.inbound),
-      salesY: g.y(point.sales),
+      salesY: g.y(point.outbound),
       tooltipX: Math.min(Math.max(x, 90), g.width - 90),
     };
   });

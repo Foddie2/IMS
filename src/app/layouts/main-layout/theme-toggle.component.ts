@@ -14,7 +14,7 @@ const META: Record<ThemePreference, { icon: IconName; label: string; next: strin
   template: `
     <button
       type="button"
-      class="grid size-10 place-items-center rounded-xl text-ink-muted hover:bg-surface-subtle hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600"
+      class="grid size-10 place-items-center rounded-sm text-ink-muted hover:bg-surface-subtle hover:text-ink focus-visible:outline-2 focus-visible:outline-blue-600"
       [title]="'Theme: ' + meta().label"
       (click)="theme.cycle()"
     >

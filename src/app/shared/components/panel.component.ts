@@ -7,7 +7,7 @@ let nextPanelId = 0;
   selector: 'app-panel',
   template: `
     <section
-      class="flex h-full flex-col rounded-2xl border border-line bg-surface p-5 shadow-sm"
+      class="flex h-full flex-col rounded-sm border border-line bg-surface p-5 shadow-sm"
       [attr.aria-labelledby]="headingId"
     >
       <header class="mb-4 flex flex-wrap items-start justify-between gap-3">

@@ -38,7 +38,7 @@ const PAGE_SIZE = 8;
     StatusIndicatorComponent,
   ],
   template: `
-    <section class="rounded-2xl border border-line bg-surface shadow-sm" aria-labelledby="inventory-heading">
+    <section class="rounded-sm border border-line bg-surface shadow-sm" aria-labelledby="inventory-heading">
       <header class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
         <div>
           <h2 id="inventory-heading" class="text-base font-semibold text-ink">Inventory Items</h2>
@@ -56,7 +56,7 @@ const PAGE_SIZE = 8;
             <span class="text-sm text-ink-muted">{{ selectedCount() }} selected</span>
             <button
               type="button"
-              class="rounded-lg px-2 py-1 text-sm font-medium text-accent-ink hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-blue-600"
+              class="rounded-sm px-2 py-1 text-sm font-medium text-accent-ink hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-blue-600"
               (click)="selected.set(emptySelection)"
             >
               Clear
@@ -64,7 +64,7 @@ const PAGE_SIZE = 8;
           }
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm font-medium text-ink-secondary shadow-sm hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            class="inline-flex items-center gap-2 rounded-sm border border-line-strong bg-surface px-3.5 py-2 text-sm font-medium text-ink-secondary shadow-sm hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             aria-controls="inventory-filter-panel"
             [attr.aria-expanded]="filtersOpen()"
             (click)="filtersOpen.update((open) => !open)"
@@ -133,7 +133,7 @@ const PAGE_SIZE = 8;
                 </td>
                 <td class="px-3 py-3 font-mono text-xs text-ink-secondary">{{ item.sku }}</td>
                 <td class="px-3 py-3">
-                  <span class="rounded-md bg-surface-subtle px-2 py-1 text-xs font-medium whitespace-nowrap text-ink-secondary">{{ item.category }}</span>
+                  <span class="rounded-sm bg-surface-subtle px-2 py-1 text-xs font-medium whitespace-nowrap text-ink-secondary">{{ item.category }}</span>
                 </td>
                 <td class="px-3 py-3 text-right tabular-nums">
                   <span class="font-semibold text-ink">{{ item.stock | number }}</span>
@@ -147,14 +147,14 @@ const PAGE_SIZE = 8;
                     width="40"
                     height="40"
                     [alt]="item.name"
-                    class="size-10 rounded-lg border border-line bg-surface-muted object-contain p-0.5"
+                    class="size-10 rounded-sm border border-line bg-surface-muted object-contain p-0.5"
                   />
                 </td>
                 <td class="py-3 pr-5 pl-3">
                   <div class="flex items-center justify-end gap-1">
                     <button
                       type="button"
-                      class="rounded-lg bg-blue-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                      class="rounded-sm bg-blue-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                       (click)="viewItem(item)"
                     >
                       Action<span class="sr-only">: view {{ item.name }}</span>
@@ -173,7 +173,7 @@ const PAGE_SIZE = 8;
                   @if (store.totalCount() === 0) {
                     <app-inventory-empty-state
                       heading="No products yet"
-                      message="Products added in Supabase will appear here automatically."
+                      message="Products added in IMS will appear here automatically."
                       [showReset]="false"
                     />
                   } @else {
@@ -195,7 +195,7 @@ const PAGE_SIZE = 8;
           <div class="flex items-center gap-1">
             <button
               type="button"
-              class="grid size-9 place-items-center rounded-lg border border-line-strong bg-surface hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              class="grid size-9 place-items-center rounded-sm border border-line-strong bg-surface hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
               [disabled]="page() === 1"
               (click)="page.set(page() - 1)"
             >
@@ -205,7 +205,7 @@ const PAGE_SIZE = 8;
             <span class="px-2 tabular-nums">Page {{ page() }} of {{ pageCount() }}</span>
             <button
               type="button"
-              class="grid size-9 place-items-center rounded-lg border border-line-strong bg-surface hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              class="grid size-9 place-items-center rounded-sm border border-line-strong bg-surface hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
               [disabled]="page() === pageCount()"
               (click)="page.set(page() + 1)"
             >
@@ -224,7 +224,7 @@ const PAGE_SIZE = 8;
     />
 
     <div
-      class="pointer-events-none fixed right-4 bottom-4 z-50 rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-surface shadow-lg transition-opacity"
+      class="pointer-events-none fixed right-4 bottom-4 z-50 rounded-sm bg-ink px-4 py-2.5 text-sm font-medium text-surface shadow-lg transition-opacity"
       [class.opacity-0]="!toast()"
       role="status"
     >

@@ -66,38 +66,17 @@ function trendDelta(series: readonly number[]): string | null {
           </p>
         </div>
 
-        @if (inventory.source(); as source) {
+        @if (inventory.syncedAt(); as syncedAt) {
           <div class="flex flex-wrap items-center gap-2">
-            @if (source === 'live') {
-              <span class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-good-ink">
-                <span class="size-2 rounded-full bg-[#0ca30c]" aria-hidden="true"></span> Live · Supabase
-              </span>
-              @if (inventory.realtime() === 'live') {
-                <span class="inline-flex items-center gap-1.5 text-xs text-ink-subtle">
-                  <span class="relative flex size-2" aria-hidden="true">
-                    <span class="absolute inline-flex size-full animate-ping rounded-full bg-[#0ca30c] opacity-60"></span>
-                    <span class="relative inline-flex size-2 rounded-full bg-[#0ca30c]"></span>
-                  </span>
-                  Realtime
-                </span>
-              }
-              @if (inventory.syncedAt(); as syncedAt) {
-                <span class="text-xs text-ink-subtle">
-                  Synced <time [attr.datetime]="syncedAt">{{ syncedAt | date: 'shortTime' }}</time>
-                </span>
-              }
-            } @else {
-              <span
-                class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-warn-ink"
-                [title]="inventory.notice() ?? ''"
-              >
-                <span class="size-2 rounded-full bg-[#fab219]" aria-hidden="true"></span>
-                Sample data<span class="sr-only">: {{ inventory.notice() }}</span>
-              </span>
-            }
+            <span class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-good-ink">
+              <span class="size-2 rounded-full bg-[#0ca30c]" aria-hidden="true"></span> Live · IMS API
+            </span>
+            <span class="text-xs text-ink-subtle">
+              Synced <time [attr.datetime]="syncedAt">{{ syncedAt | date: 'shortTime' }}</time>
+            </span>
             <button
               type="button"
-              class="inline-flex items-center gap-2 rounded-xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink-secondary hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-60"
+              class="inline-flex items-center gap-2 rounded-sm border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink-secondary hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-60"
               [disabled]="inventory.isRefreshing()"
               (click)="inventory.reload()"
             >
@@ -108,19 +87,30 @@ function trendDelta(series: readonly number[]): string | null {
         }
       </header>
 
-      @if (inventory.isLoading()) {
+      @if (inventory.error(); as message) {
+        <div class="flex flex-col items-center gap-3 rounded-sm border border-line bg-surface px-6 py-14 text-center" role="alert">
+          <span class="grid size-12 place-items-center rounded-sm bg-red-50 text-bad-ink dark:bg-red-500/15">
+            <app-icon name="alert" class="size-6" />
+          </span>
+          <h2 class="text-base font-semibold text-ink">The dashboard could not load</h2>
+          <p class="max-w-md text-sm text-ink-muted">{{ message }}</p>
+          <button type="button" class="btn-primary mt-2" (click)="inventory.reload()">
+            <app-icon name="reset" class="size-4" /> Try again
+          </button>
+        </div>
+      } @else if (inventory.isLoading()) {
         <div class="flex flex-col gap-6" aria-busy="true" aria-label="Loading dashboard">
           <p class="sr-only" role="status">Loading inventory data…</p>
           <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             @for (i of [1, 2, 3, 4]; track i) {
-              <div class="h-36 animate-pulse rounded-2xl border border-line bg-surface"></div>
+              <div class="h-36 animate-pulse rounded-sm border border-line bg-surface"></div>
             }
           </div>
           <div class="grid gap-4 xl:grid-cols-3">
-            <div class="h-96 animate-pulse rounded-2xl border border-line bg-surface xl:col-span-2"></div>
-            <div class="h-96 animate-pulse rounded-2xl border border-line bg-surface"></div>
+            <div class="h-96 animate-pulse rounded-sm border border-line bg-surface xl:col-span-2"></div>
+            <div class="h-96 animate-pulse rounded-sm border border-line bg-surface"></div>
           </div>
-          <div class="h-96 animate-pulse rounded-2xl border border-line bg-surface"></div>
+          <div class="h-96 animate-pulse rounded-sm border border-line bg-surface"></div>
         </div>
       } @else {
         <section aria-label="Key metrics" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -210,15 +200,15 @@ export class DashboardComponent {
         id: 'orders',
         label: 'Pending Orders',
         value: integer.format(ops?.pendingOrders ?? 0),
-        caption: 'awaiting fulfilment',
+        caption: 'purchase orders awaiting receipt',
         delta: null,
         icon: 'orders',
         iconClass: 'bg-amber-50 text-warn-ink dark:bg-amber-500/15',
         visual: {
           kind: 'progress',
           value: ops?.pendingOrders ?? 0,
-          max: ops?.pendingOrdersCapacity ?? 0,
-          label: 'Pending orders against daily fulfilment capacity',
+          max: Math.max(ops?.recentOrders ?? 0, ops?.pendingOrders ?? 0),
+          label: 'Pending purchase orders out of those created in the last 30 days',
         },
       },
       {

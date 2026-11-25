@@ -1,12 +1,11 @@
 import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { ROLE_LABELS, Role } from '../../core/models/auth.models';
-import { Router } from '@angular/router';
+import { ROLE_LABELS } from '../../core/models/auth.models';
 import { AuthService } from '../../core/services/auth.service';
 import { IconComponent } from '../../shared/components/icon.component';
 
 const MENU_WIDTH = 288;
 
-/** Account popover: who am I, my role, and (demo mode) a persona switcher for RBAC previews. */
+/** Account popover: who am I, my role and warehouse access, sign out. */
 @Component({
   selector: 'app-account-menu',
   imports: [IconComponent],
@@ -14,7 +13,7 @@ const MENU_WIDTH = 288;
     <button
       #trigger
       type="button"
-      class="flex shrink-0 items-center gap-2 rounded-xl p-1 hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-blue-600"
+      class="flex shrink-0 items-center gap-2 rounded-sm p-1 hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-blue-600"
       popovertarget="account-menu"
       aria-controls="account-menu"
       [attr.aria-expanded]="open()"
@@ -30,7 +29,7 @@ const MENU_WIDTH = 288;
       #menu
       id="account-menu"
       popover
-      class="inset-auto m-0 w-72 rounded-2xl border border-line bg-surface p-0 text-sm text-ink shadow-xl"
+      class="inset-auto m-0 w-72 rounded-sm border border-line bg-surface p-0 text-sm text-ink shadow-xl"
       [style.position]="'fixed'"
       [style.top.px]="position().top"
       [style.left.px]="position().left"
@@ -38,43 +37,27 @@ const MENU_WIDTH = 288;
     >
       <div class="border-b border-line p-4">
         <p class="font-semibold">{{ auth.user().name }}</p>
-        <p class="truncate text-xs text-ink-subtle">{{ auth.user().title }}</p>
+        <p class="truncate text-xs text-ink-subtle">{{ auth.email() }}</p>
         <p class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent-ink">
           <app-icon name="shield" class="size-3.5" />
           {{ roleLabels[auth.user().role] }}
         </p>
+        <p class="mt-2 text-xs text-ink-subtle">
+          @if (auth.user().siteIds.includes('*')) {
+            Access to all warehouses
+          } @else {
+            Access to {{ auth.user().siteIds.length }} assigned warehouse{{ auth.user().siteIds.length === 1 ? '' : 's' }}
+          }
+        </p>
       </div>
 
-      @if (auth.source === 'demo') {
-        <fieldset class="border-b border-line p-2">
-          <legend class="px-2 pt-2 pb-1 text-xs font-semibold tracking-wider text-ink-subtle uppercase">Preview as role</legend>
-          @for (persona of auth.demoUsers; track persona.id) {
-            <label class="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 hover:bg-surface-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-blue-600">
-              <input
-                type="radio"
-                name="demo-role"
-                class="mt-0.5 size-4 accent-blue-600"
-                [value]="persona.role"
-                [checked]="auth.user().role === persona.role"
-                (change)="switchRole(persona.role)"
-              />
-              <span class="min-w-0">
-                <span class="block font-medium">{{ roleLabels[persona.role] }}</span>
-                <span class="block truncate text-xs text-ink-subtle">{{ persona.name }} · {{ persona.siteIds.includes('*') ? 'all sites' : persona.siteIds.length + ' sites' }}</span>
-              </span>
-            </label>
-          }
-        </fieldset>
-      } @else {
-        <p class="border-b border-line px-4 py-3 text-xs text-ink-subtle">
-          Signed in as <span class="font-medium text-ink-secondary">{{ auth.email() }}</span>.
-          Role and site access are managed by your administrator.
-        </p>
-      }
-
       <div class="p-2">
-        <button type="button" class="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-ink-secondary hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600" [disabled]="auth.source === 'demo'" (click)="signOut()">
-          <app-icon name="logout" class="size-4 text-ink-subtle" /> {{ auth.source === 'demo' ? 'Demo mode (no sign-in)' : 'Sign out' }}
+        <button
+          type="button"
+          class="flex w-full items-center gap-2.5 rounded-sm px-2 py-2 text-left text-ink-secondary hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-blue-600"
+          (click)="signOut()"
+        >
+          <app-icon name="logout" class="size-4 text-ink-subtle" /> Sign out
         </button>
       </div>
     </div>
@@ -85,6 +68,7 @@ export class AccountMenuComponent {
   protected readonly roleLabels = ROLE_LABELS;
 
   private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');
+  private readonly menu = viewChild.required<ElementRef<HTMLElement>>('menu');
   protected readonly open = signal(false);
   protected readonly position = signal({ top: 0, left: 0 });
 
@@ -96,16 +80,8 @@ export class AccountMenuComponent {
     this.position.set({ top: rect.bottom + 8, left: Math.max(8, rect.right - MENU_WIDTH) });
   }
 
-  private readonly router = inject(Router);
-  private readonly menu = viewChild.required<ElementRef<HTMLElement>>('menu');
-
-  protected async signOut(): Promise<void> {
+  protected signOut(): void {
     this.menu().nativeElement.hidePopover();
-    await this.auth.signOut();
-    await this.router.navigate(['/login']);
-  }
-
-  protected switchRole(role: Role): void {
-    this.auth.switchDemoRole(role);
+    this.auth.logout({ redirect: true, returnUrl: '' });
   }
 }

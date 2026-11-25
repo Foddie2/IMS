@@ -11,10 +11,10 @@ export type KpiVisual =
   selector: 'app-kpi-card',
   imports: [IconComponent, SparklineComponent],
   template: `
-    <article class="flex h-full flex-col rounded-2xl border border-line bg-surface p-5 shadow-sm">
+    <article class="flex h-full flex-col rounded-sm border border-line bg-surface p-5 shadow-sm">
       <div class="flex items-center justify-between gap-3">
         <h3 class="text-sm font-medium text-ink-muted">{{ label() }}</h3>
-        <span class="grid size-9 place-items-center rounded-xl" [class]="iconClass()">
+        <span class="grid size-9 place-items-center rounded-sm" [class]="iconClass()">
           <app-icon [name]="icon()" class="size-4.5" />
         </span>
       </div>
@@ -47,7 +47,7 @@ export type KpiVisual =
           >
             <div class="h-full rounded-full bg-series-1 transition-[width] duration-500" [style.width.%]="p.percent"></div>
           </div>
-          <p class="mt-1.5 text-xs text-ink-subtle">{{ p.percent }}% of daily fulfilment capacity ({{ p.max }})</p>
+          <p class="mt-1.5 text-xs text-ink-subtle">{{ p.value }} of {{ p.max }} orders from the last 30 days still open</p>
         </div>
       }
     </article>
